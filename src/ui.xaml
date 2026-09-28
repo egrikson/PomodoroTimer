@@ -1,0 +1,250 @@
+﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Помодоро" Width="400" Height="520"
+        WindowStyle="None" AllowsTransparency="False" ResizeMode="NoResize"
+        Background="Transparent" WindowStartupLocation="CenterScreen"
+        UseLayoutRounding="True" TextOptions.TextFormattingMode="Ideal"
+        FontFamily="Segoe UI Variable Text, Segoe UI" FontSize="14">
+
+  <Window.Resources>
+
+    <!-- ControlElevationBorderBrush -->
+    <LinearGradientBrush x:Key="CtrlBorder" StartPoint="0,0" EndPoint="0,1">
+      <GradientStop Color="%BR1%" Offset="0"/>
+      <GradientStop Color="%BR1%" Offset="0.9"/>
+      <GradientStop Color="%BR2%" Offset="1"/>
+    </LinearGradientBrush>
+
+    <!-- AccentControlElevationBorderBrush -->
+    <LinearGradientBrush x:Key="AccentBorder" StartPoint="0,0" EndPoint="0,1">
+      <GradientStop Color="%ABR1%" Offset="0"/>
+      <GradientStop Color="%ABR1%" Offset="0.9"/>
+      <GradientStop Color="%ABR2%" Offset="1"/>
+    </LinearGradientBrush>
+
+    <!-- Стандартная кнопка Fluent -->
+    <Style x:Key="StdBtn" TargetType="Button">
+      <Setter Property="Height" Value="34"/>
+      <Setter Property="Foreground" Value="%TXT1%"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="b" CornerRadius="4" Background="%CTRL1%"
+                    BorderThickness="1" BorderBrush="{StaticResource CtrlBorder}">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="12,0"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="b" Property="Background" Value="%CTRL2%"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="b" Property="Background" Value="%CTRL3%"/>
+                <Setter TargetName="b" Property="BorderBrush" Value="%BR1%"/>
+                <Setter Property="Foreground" Value="%TXT2%"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Акцентная кнопка Fluent -->
+    <Style x:Key="AccentBtn" TargetType="Button">
+      <Setter Property="Height" Value="34"/>
+      <Setter Property="Foreground" Value="%ACCTXT%"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="b" CornerRadius="4" Background="%ACC%"
+                    BorderThickness="1" BorderBrush="{StaticResource AccentBorder}">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="12,0"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="b" Property="Opacity" Value="0.9"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="b" Property="Opacity" Value="0.8"/>
+                <Setter TargetName="b" Property="BorderBrush" Value="Transparent"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Кнопки заголовка окна -->
+    <Style x:Key="Caption" TargetType="Button">
+      <Setter Property="Width" Value="46"/>
+      <Setter Property="Height" Value="40"/>
+      <Setter Property="Foreground" Value="%TXT1%"/>
+      <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets"/>
+      <Setter Property="FontSize" Value="10"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="b" Background="Transparent">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="b" Property="Background" Value="%SUB1%"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="b" Property="Background" Value="%SUB2%"/>
+                <Setter Property="Foreground" Value="%TXT2%"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style x:Key="CaptionClose" TargetType="Button" BasedOn="{StaticResource Caption}">
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="b" Background="Transparent">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="b" Property="Background" Value="#FFC42B1C"/>
+                <Setter Property="Foreground" Value="#FFFFFFFF"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="b" Property="Background" Value="#FFB2271A"/>
+                <Setter Property="Foreground" Value="#C5FFFFFF"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Selector bar: акцентное подчёркивание под выбранным пунктом -->
+    <Style x:Key="Seg" TargetType="RadioButton">
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="RadioButton">
+            <Grid Margin="2,0">
+              <Border x:Name="b" CornerRadius="4" Background="Transparent"/>
+              <TextBlock x:Name="t" Text="{TemplateBinding Content}" FontSize="14"
+                         Foreground="%TXT2%" Margin="0,9,0,11"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              <Border x:Name="ind" Height="3" Width="18" CornerRadius="1.5"
+                      Background="%ACC%" Opacity="0"
+                      HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+            </Grid>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="b" Property="Background" Value="%SUB1%"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="b" Property="Background" Value="%SUB2%"/>
+              </Trigger>
+              <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="ind" Property="Opacity" Value="1"/>
+                <Setter TargetName="t" Property="Foreground" Value="%TXT1%"/>
+                <Setter TargetName="t" Property="FontWeight" Value="SemiBold"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+  </Window.Resources>
+
+  <Border x:Name="Root">
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="40"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+      </Grid.RowDefinitions>
+
+      <!-- Заголовок -->
+      <Grid x:Name="Bar" Grid.Row="0" Background="Transparent">
+        <TextBlock Text="Помодоро" FontSize="12" Foreground="%TXT1%"
+                   VerticalAlignment="Center" Margin="16,0,0,0"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+          <Button x:Name="BackdropBtn" Style="{StaticResource Caption}" Content="&#xE890;"
+                  ToolTip="Подложка: мика / акрил / сплошная"/>
+          <Button x:Name="PinBtn" Style="{StaticResource Caption}" Content="&#xE718;"
+                  ToolTip="Поверх всех окон"/>
+          <Button x:Name="MinBtn" Style="{StaticResource Caption}" Content="&#xE921;"
+                  ToolTip="Свернуть"/>
+          <Button x:Name="CloseBtn" Style="{StaticResource CaptionClose}" Content="&#xE8BB;"
+                  ToolTip="Закрыть"/>
+        </StackPanel>
+      </Grid>
+
+      <!-- Выбор таймингов -->
+      <Border Grid.Row="1" Margin="24,0,24,0"
+              BorderThickness="0,0,0,1" BorderBrush="%BR1%">
+        <UniformGrid Columns="3">
+          <RadioButton x:Name="P0" GroupName="pre" Style="{StaticResource Seg}" Content="25 / 5" IsChecked="True"/>
+          <RadioButton x:Name="P1" GroupName="pre" Style="{StaticResource Seg}" Content="50 / 10"/>
+          <RadioButton x:Name="P2" GroupName="pre" Style="{StaticResource Seg}" Content="60 / 15"/>
+        </UniformGrid>
+      </Border>
+
+      <!-- Кольцо обратного отсчёта -->
+      <Grid Grid.Row="2">
+        <Grid Width="220" Height="220" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Canvas Width="220" Height="220">
+            <Ellipse Canvas.Left="18" Canvas.Top="18" Width="184" Height="184"
+                     Stroke="%TRACK%" StrokeThickness="10"/>
+            <Path x:Name="Prog" StrokeThickness="10"
+                  StrokeStartLineCap="Round" StrokeEndLineCap="Round">
+              <Path.Data>
+                <PathGeometry>
+                  <PathFigure StartPoint="110,18">
+                    <ArcSegment Size="92,92" SweepDirection="Clockwise" Point="110,18" IsLargeArc="False"/>
+                  </PathFigure>
+                </PathGeometry>
+              </Path.Data>
+            </Path>
+          </Canvas>
+          <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock x:Name="TimeTxt" Text="25:00" FontSize="46"
+                       FontFamily="Segoe UI Variable Display, Segoe UI"
+                       Foreground="%TXT1%" HorizontalAlignment="Center"/>
+            <TextBlock x:Name="PhaseTxt" Text="Фокус" FontSize="14" Foreground="%TXT2%"
+                       HorizontalAlignment="Center" Margin="0,2,0,0"/>
+          </StackPanel>
+        </Grid>
+      </Grid>
+
+      <!-- Прогресс цикла -->
+      <StackPanel Grid.Row="3" HorizontalAlignment="Center">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+          <Ellipse x:Name="D0" Width="8" Height="8" Margin="4,0" Fill="%TRACK%"/>
+          <Ellipse x:Name="D1" Width="8" Height="8" Margin="4,0" Fill="%TRACK%"/>
+          <Ellipse x:Name="D2" Width="8" Height="8" Margin="4,0" Fill="%TRACK%"/>
+          <Ellipse x:Name="D3" Width="8" Height="8" Margin="4,0" Fill="%TRACK%"/>
+        </StackPanel>
+        <TextBlock x:Name="DoneTxt" Text="Завершено: 0" FontSize="12" Foreground="%TXT2%"
+                   HorizontalAlignment="Center" Margin="0,12,0,0"/>
+      </StackPanel>
+
+      <!-- Управление -->
+      <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="24,20,24,24">
+        <Button x:Name="MainBtn" Style="{StaticResource AccentBtn}" Content="Старт"
+                MinWidth="112" ToolTip="Пробел"/>
+        <Button x:Name="ResetBtn" Style="{StaticResource StdBtn}" Content="Сбросить"
+                MinWidth="100" Margin="8,0,0,0" ToolTip="R"/>
+        <Button x:Name="SkipBtn" Style="{StaticResource StdBtn}" Content="Пропустить"
+                MinWidth="108" Margin="8,0,0,0"/>
+      </StackPanel>
+
+    </Grid>
+  </Border>
+</Window>
