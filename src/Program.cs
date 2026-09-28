@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Media;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -58,22 +57,26 @@ namespace Pomodoro
         // Геометрия кольца на холсте 220 × 220
         const double Cx = 110, Cy = 110, R = 92;
 
+        // Сколько звонит будильник, если его не выключить
+        static readonly TimeSpan RingFor = TimeSpan.FromSeconds(30);
+
         static Window win;
         static Border root;
         static Grid bar;
         static TextBlock timeTxt, phaseTxt, doneTxt;
         static System.Windows.Shapes.Path prog;
         static ArcSegment arc;
-        static Button mainBtn, resetBtn, skipBtn, pinBtn, minBtn, closeBtn, backdropBtn;
+        static Button mainBtn, resetBtn, skipBtn, soundBtn, pinBtn, minBtn, closeBtn, backdropBtn;
         static readonly Ellipse[] dots = new Ellipse[4];
         static readonly RadioButton[] segs = new RadioButton[3];
 
         static Brush accentBrush, restBrush, trackBrush, solidBrush, txt1Brush;
+        static DispatcherTimer ringTimer;
         static IntPtr hwnd = IntPtr.Zero;
 
         static bool light;
         static int idx, done, backdrop;      // backdrop: 0 мика, 1 акрил, 2 сплошная
-        static bool isWork = true, running;
+        static bool isWork = true, running, sound = true;
         static double total = 25 * 60, left = 25 * 60;
         static DateTime endAt = DateTime.Now;
 
@@ -189,6 +192,7 @@ namespace Pomodoro
             mainBtn = (Button)win.FindName("MainBtn");
             resetBtn = (Button)win.FindName("ResetBtn");
             skipBtn = (Button)win.FindName("SkipBtn");
+            soundBtn = (Button)win.FindName("SoundBtn");
             pinBtn = (Button)win.FindName("PinBtn");
             minBtn = (Button)win.FindName("MinBtn");
             closeBtn = (Button)win.FindName("CloseBtn");
@@ -229,6 +233,11 @@ namespace Pomodoro
                 SetBackdrop(0);
             };
 
+            win.Closed += delegate { Alarm.Stop(); };
+
+            // Любое действие в окне глушит звонок
+            win.PreviewMouseDown += delegate { Silence(); };
+
             bar.MouseLeftButtonDown += delegate
             {
                 try { win.DragMove(); } catch { }
@@ -247,6 +256,15 @@ namespace Pomodoro
                 };
             }
 
+            soundBtn.Click += delegate
+            {
+                sound = !sound;
+                if (!sound) Silence();
+                soundBtn.Content = sound ? "" : "";
+                soundBtn.ToolTip = sound ? "Будильник включён" : "Будильник выключен";
+                soundBtn.Foreground = sound ? txt1Brush : accentBrush;
+            };
+
             pinBtn.Click += delegate
             {
                 win.Topmost = !win.Topmost;
@@ -259,10 +277,15 @@ namespace Pomodoro
 
             win.PreviewKeyDown += delegate (object sender, KeyEventArgs e)
             {
+                Silence();
                 if (e.Key == Key.Space) { ToggleRun(); e.Handled = true; }
                 else if (e.Key == Key.R) { Reset(); e.Handled = true; }
                 else if (e.Key == Key.Escape) { win.Close(); }
             };
+
+            // Звонок сам замолкает, если к компьютеру не подошли
+            ringTimer = new DispatcherTimer { Interval = RingFor };
+            ringTimer.Tick += delegate { Silence(); };
 
             var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
             timer.Tick += delegate
@@ -371,23 +394,35 @@ namespace Pomodoro
         {
             if (isWork) { done++; SetPhase(false); }
             else SetPhase(true);
-            Notify();
+            Ring(isWork);          // isWork здесь — уже новая фаза
             Update();
         }
 
-        static void Notify()
+        static void Ring(bool toWork)
         {
-            try { SystemSounds.Exclamation.Play(); } catch { }
+            if (sound)
+            {
+                Alarm.Start(toWork);
+                ringTimer.Stop();
+                ringTimer.Start();
+            }
+
             if (hwnd == IntPtr.Zero) return;
             var f = new Native.FLASHWINFO
             {
                 hwnd = hwnd,
                 dwFlags = 3 | 12,   // FLASHW_ALL | FLASHW_TIMERNOFG
-                uCount = 6,
+                uCount = 12,
                 dwTimeout = 0
             };
             f.cbSize = (uint)Marshal.SizeOf(f);
             Native.FlashWindowEx(ref f);
+        }
+
+        static void Silence()
+        {
+            if (ringTimer != null) ringTimer.Stop();
+            Alarm.Stop();
         }
     }
 }

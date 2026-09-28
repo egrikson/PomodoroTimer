@@ -7,6 +7,8 @@ $src  = Join-Path $here 'src'
 $out  = Join-Path $here 'Pomodoro.exe'
 $ico  = Join-Path $src  'icon.ico'
 
+$sources = @('Program.cs', 'Alarm.cs', 'AssemblyInfo.cs')
+
 # ── 1. Иконка ──────────────────────────────────────────────────────────────────
 Add-Type -AssemblyName System.Drawing
 
@@ -27,7 +29,7 @@ function New-IconLayer {
         ([single]55)
     $g.FillEllipse($brush, $disc)
 
-    # верхний блик — «стекло»
+    # верхний блик
     $glossRect = New-Object System.Drawing.RectangleF -ArgumentList `
         ([single]($size * 0.12)), ([single]($size * 0.06)),
         ([single]($size * 0.62)), ([single]($size * 0.42))
@@ -80,10 +82,15 @@ $bw.Dispose()
 Write-Host ("Иконка: {0} ({1} байт, {2} размеров)" -f $ico, (Get-Item $ico).Length, $sizes.Count)
 
 # ── 2. Кодировка исходников: csc и XamlReader ждут UTF-8 с BOM ─────────────────
-$bom = New-Object System.Text.UTF8Encoding($true)
-foreach ($f in @('Program.cs', 'AssemblyInfo.cs', 'ui.xaml')) {
+# Переписываем только файлы без BOM, чтобы не трогать время изменения зря.
+$bomEnc = New-Object System.Text.UTF8Encoding($true)
+foreach ($f in ($sources + 'ui.xaml')) {
     $p = Join-Path $src $f
-    [System.IO.File]::WriteAllText($p, [System.IO.File]::ReadAllText($p), $bom)
+    $head = [System.IO.File]::ReadAllBytes($p) | Select-Object -First 3
+    if ($head.Count -lt 3 -or $head[0] -ne 0xEF -or $head[1] -ne 0xBB -or $head[2] -ne 0xBF) {
+        [System.IO.File]::WriteAllText($p, [System.IO.File]::ReadAllText($p), $bomEnc)
+        Write-Host "  BOM добавлен: $f"
+    }
 }
 
 # ── 3. Компиляция ──────────────────────────────────────────────────────────────
@@ -104,17 +111,14 @@ if (-not (Test-Path $csc)) { throw 'csc.exe не найден — нужен .NE
 
 if (Test-Path $out) { Remove-Item $out -Force }
 
-$args = @(
+$cscArgs = @(
     '/nologo', '/noconfig', '/target:winexe', '/platform:anycpu', '/optimize+', '/warn:4',
     "/out:$out",
     "/win32icon:$ico",
     "/resource:$(Join-Path $src 'ui.xaml'),ui.xaml"
-) + $refs + @(
-    (Join-Path $src 'Program.cs'),
-    (Join-Path $src 'AssemblyInfo.cs')
-)
+) + $refs + @($sources | ForEach-Object { Join-Path $src $_ })
 
-& $csc $args
+& $csc $cscArgs
 if ($LASTEXITCODE -ne 0) { throw "csc завершился с кодом $LASTEXITCODE" }
 
 $size = [math]::Round((Get-Item $out).Length / 1KB, 1)

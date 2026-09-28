@@ -175,6 +175,8 @@
         <TextBlock Text="Помодоро" FontSize="12" Foreground="%TXT1%"
                    VerticalAlignment="Center" Margin="16,0,0,0"/>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+          <Button x:Name="SoundBtn" Style="{StaticResource Caption}" Content="&#xE767;"
+                  ToolTip="Будильник включён"/>
           <Button x:Name="BackdropBtn" Style="{StaticResource Caption}" Content="&#xE890;"
                   ToolTip="Подложка: мика / акрил / сплошная"/>
           <Button x:Name="PinBtn" Style="{StaticResource Caption}" Content="&#xE718;"
